@@ -1,28 +1,55 @@
 <template>
   <div>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your 한나Vue.js App" />
+    <UECboard />
+    <TECboard />
+    <DAUboard />
+    <TRPieBoard />
+    <TRChartBoard />
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import UECboard from "./components/boards/UECboard.vue";
+import TECboard from "./components/boards/TECboard.vue";
+import DAUboard from "./components/boards/DAUboard.vue";
+import TRPieBoard from "./components/boards/TRPieBoard.vue";
+import TRChartBoard from "./components/boards/TRChartBoard.vue";
 
 export default {
   name: "App",
   components: {
-    HelloWorld,
+    UECboard,
+    TECboard,
+    DAUboard,
+    TRPieBoard,
+    TRChartBoard,
   },
 };
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.board-container {
+  padding: 15px;
+}
+.board-title span {
+  font-size: 18px;
+  color: skyblue;
+  font-weight: bold;
+}
+.sum {
+  width: 30px;
+  margin-right: 10px;
+  border: 1px solid gray;
+  background-color: gray;
+  border-radius: 6px;
+}
+.board-rate .rate {
+  color: gray;
+}
+.board-rate .rate.up {
+  color: red;
+}
+.board-rate .rate.down {
+  color: blue;
 }
 </style>
