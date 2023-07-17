@@ -27,7 +27,7 @@ export default {
   components: {},
   data() {
     return {
-      UECdata: {},
+      TECdata: {},
       now: dayjs(),
       total: 0,
       prevTotal: 0,
@@ -37,32 +37,36 @@ export default {
   mounted() {
     this.get();
   },
+  watch: {
+    TECdata() {
+      // 오늘날짜 총 접속 유저 찾기
+      console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
+      for (let i = 0; i > this.TECdata.rows.length; i++) {
+        if (this.TECdata.rows[i][0] === this.now.format("YYYY-MM-DD")) {
+          this.total += this.TECdata.rows[i][2];
+        }
+      }
+      console.log(this.total);
+      // 어제와 비교하여 감소 또는 증가된 수
+      for (let i = 0; i > this.TECdata.rows.length; i++) {
+        if (
+          this.TECdata.rows[i][0] ===
+          this.now.subtract(1, "day").format("YYYY-MM-DD")
+        ) {
+          this.prevTotal += this.TECdata.rows[i][2];
+        }
+      }
+      this.rate = this.total - this.prevTotal;
+    },
+  },
   methods: {
     get() {
       axios
         .get("https://static.adbrix.io/front/coding-test/event_1.json")
         .then((response) => {
           console.log(response);
-          this.UECdata = response.data.data;
-          console.log("UECdata = ", this.UECdata);
-          // 오늘날짜 총 접속 유저 찾기
-          console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
-          for (let i = 0; i > this.UECdata.rows.length; i++) {
-            if (this.UECdata.rows[i][0] === this.now.format("YYYY-MM-DD")) {
-              this.total += this.UECdata.rows[i][2];
-            }
-          }
-          console.log(this.total);
-          // 어제와 비교하여 감소 또는 증가된 수
-          for (let i = 0; i > this.UECdata.rows.length; i++) {
-            if (
-              this.UECdata.rows[i][0] ===
-              this.now.subtract(1, "day").format("YYYY-MM-DD")
-            ) {
-              this.prevTotal += this.UECdata.rows[i][2];
-            }
-          }
-          this.rate = this.total - this.prevTotal;
+          this.TECdata = response.data.data;
+          console.log("TECdata = ", this.TECdata);
         });
     },
   },

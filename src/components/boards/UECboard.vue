@@ -37,6 +37,28 @@ export default {
   mounted() {
     this.get();
   },
+  watch: {
+    UECdata() {
+      // 오늘날짜 총 접속 유저 찾기
+      console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
+      for (let i = 0; i > this.UECdata.rows.length; i++) {
+        if (this.UECdata.rows[i][0] === this.now.format("YYYY-MM-DD")) {
+          this.total += this.UECdata.rows[i][1];
+        }
+      }
+      console.log(this.total);
+      // 어제와 비교하여 감소 또는 증가된 수
+      for (let i = 0; i > this.UECdata.rows.length; i++) {
+        if (
+          this.UECdata.rows[i][0] ===
+          this.now.subtract(1, "day").format("YYYY-MM-DD")
+        ) {
+          this.prevTotal += this.UECdata.rows[i][1];
+        }
+      }
+      this.rate = this.total - this.prevTotal;
+    },
+  },
   methods: {
     get() {
       axios
@@ -45,24 +67,6 @@ export default {
           console.log(response);
           this.UECdata = response.data.data;
           console.log("UECdata = ", this.UECdata);
-          // 오늘날짜 총 접속 유저 찾기
-          console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
-          for (let i = 0; i > this.UECdata.rows.length; i++) {
-            if (this.UECdata.rows[i][0] === this.now.format("YYYY-MM-DD")) {
-              this.total += this.UECdata.rows[i][1];
-            }
-          }
-          console.log(this.total);
-          // 어제와 비교하여 감소 또는 증가된 수
-          for (let i = 0; i > this.UECdata.rows.length; i++) {
-            if (
-              this.UECdata.rows[i][0] ===
-              this.now.subtract(1, "day").format("YYYY-MM-DD")
-            ) {
-              this.prevTotal += this.UECdata.rows[i][1];
-            }
-          }
-          this.rate = this.total - this.prevTotal;
         });
     },
   },
