@@ -15,6 +15,7 @@
         rate.toLocaleString()
       }}</span>
     </div>
+    <p>임시 : 2022-03-17 날짜 기준데이터 노출을 위해 하드코딩으로 작업</p>
   </div>
 </template>
 
@@ -28,7 +29,7 @@ export default {
   data() {
     return {
       UECdata: {},
-      now: dayjs(),
+      now: dayjs("2022-03-17"),
       total: 0,
       prevTotal: 0,
       rate: 0,
@@ -41,21 +42,18 @@ export default {
     UECdata() {
       // 오늘날짜 총 접속 유저 찾기
       console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
-      for (let i = 0; i > this.UECdata.rows.length; i++) {
-        if (this.UECdata.rows[i][0] === this.now.format("YYYY-MM-DD")) {
-          this.total += this.UECdata.rows[i][1];
+      this.UECdata.rows.forEach((data) => {
+        if (data[0] === this.now.format("YYYY-MM-DD")) {
+          this.total += Number(data[1]);
         }
-      }
+      });
       console.log(this.total);
       // 어제와 비교하여 감소 또는 증가된 수
-      for (let i = 0; i > this.UECdata.rows.length; i++) {
-        if (
-          this.UECdata.rows[i][0] ===
-          this.now.subtract(1, "day").format("YYYY-MM-DD")
-        ) {
-          this.prevTotal += this.UECdata.rows[i][1];
+      this.UECdata.rows.forEach((data) => {
+        if (data[0] === this.now.subtract(1, "day").format("YYYY-MM-DD")) {
+          this.prevTotal += Number(data[1]);
         }
-      }
+      });
       this.rate = this.total - this.prevTotal;
     },
   },

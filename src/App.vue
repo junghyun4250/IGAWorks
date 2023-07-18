@@ -1,32 +1,46 @@
 <template>
   <div>
-    <SmartWidgetGrid :layout="layout">
-      <SmartWidget :v-slot="0" simple>
-        <div class="layout-center">
-          <UECboard />
-        </div>
-      </SmartWidget>
-      <SmartWidget :v-slot="1" simple>
-        <div class="layout-center">
-          <TECboard />
-        </div>
-      </SmartWidget>
-      <SmartWidget :v-slot="2" simple>
-        <div class="layout-center">
-          <DAUboard />
-        </div>
-      </SmartWidget>
-      <SmartWidget :v-slot="3" simple>
-        <div class="layout-center">
-          <TRPieBoard />
-        </div>
-      </SmartWidget>
-      <SmartWidget :v-slot="4" simple>
-        <div class="layout-center">
-          <TRChartBoard />
-        </div>
-      </SmartWidget>
-    </SmartWidgetGrid>
+    <button type="button" @click="widgetOn">Widget Test</button>
+    <span>
+      사이즈 및 위치 이동 기능은 작동 하지만 버전 문제로 인해 화면 이슈 있음
+      (시간부족 미완...)
+    </span>
+    <div v-if="!isWidget">
+      <UECboard />
+      <TECboard />
+      <DAUboard />
+      <TRPieBoard />
+      <TRChartBoard />
+    </div>
+    <div v-else>
+      <SmartWidgetGrid :layout="layout">
+        <SmartWidget :v-slot="0" simple>
+          <div class="layout-center">
+            <UECboard />
+          </div>
+        </SmartWidget>
+        <SmartWidget :v-slot="1" simple>
+          <div class="layout-center">
+            <TECboard />
+          </div>
+        </SmartWidget>
+        <SmartWidget :v-slot="2" simple>
+          <div class="layout-center">
+            <DAUboard />
+          </div>
+        </SmartWidget>
+        <SmartWidget :v-slot="3" simple>
+          <div class="layout-center">
+            <TRPieBoard />
+          </div>
+        </SmartWidget>
+        <SmartWidget :v-slot="4" simple>
+          <div class="layout-center">
+            <TRChartBoard />
+          </div>
+        </SmartWidget>
+      </SmartWidgetGrid>
+    </div>
   </div>
 </template>
 
@@ -61,7 +75,13 @@ export default {
         { x: 0, y: 2, w: 6, h: 4, i: 3 },
         { x: 6, y: 2, w: 6, h: 4, i: 4 },
       ],
+      isWidget: false,
     };
+  },
+  methods: {
+    widgetOn() {
+      this.isWidget = !this.isWidget;
+    },
   },
 };
 </script>
@@ -99,5 +119,17 @@ export default {
 }
 .smartwidget .is-always-shadow {
   margin: 15px;
+}
+.region-show {
+  display: block;
+}
+.region-show.on {
+  display: none;
+}
+.region-col {
+  margin-left: 20px;
+}
+.city-col {
+  margin-left: 40px;
 }
 </style>

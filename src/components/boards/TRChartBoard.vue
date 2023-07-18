@@ -2,72 +2,76 @@
   <div class="board-container">
     <div class="board-title">
       <span>Top Referral</span>
+      <p>시간부족으로 이벤트 카운트 및 바인딩 작업만 완료 (미완 : 드릴다운)</p>
     </div>
     <div class="chart" style="height: 600px">
-      <!-- <VueGoodTable :columns="columns" :rows="rows" /> -->
-      <ag-grid-vue
-        style="width: 100%; height: 100%"
-        class="ag-theme-alpine"
-        :columnDefs="columnDefs"
-        @grid-ready="onGridReady"
-        :defaultColDef="defaultColDef"
-        :groupDisplayType="groupDisplayType"
-        :animateRows="true"
-        :rowData="rowData"
-      ></ag-grid-vue>
+      <table>
+        <theader>
+          <tr>
+            <td>GroupBy</td>
+            <td>Metrics</td>
+          </tr>
+          <tr>
+            <td>Country (IP) > Region(IP) > City(IP)</td>
+            <td>Sum(Unique Event Count)</td>
+          </tr>
+        </theader>
+        <tbody
+          v-for="(dataSetData, dataSetDataIndex) in dataSet"
+          :key="dataSetDataIndex"
+        >
+          <tr>
+            <td @click="openCountry">{{ dataSetData.country }}</td>
+            <td>{{ sumCountry(dataSet, dataSetData.country) }}</td>
+          </tr>
+          <tr>
+            <td @click="openRegion">
+              <span class="region-col">{{ dataSetData.region }}</span>
+            </td>
+            <td>{{ sumRegion(dataSet, dataSetData.region) }}</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="city-col">{{ dataSetData.city }}</span>
+            </td>
+            <td>{{ sumCity(dataSet, dataSetData.city) }}</td>
+          </tr>
+          <!-- <tr
+            v-for="(regionData, regionDataIndex) in regionSet"
+            :key="regionDataIndex"
+          >
+            <td @click="openRegion">{{ regionData.region }}</td>
+          </tr> -->
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { AgGridVue } from "ag-grid-vue3";
-import "ag-grid-community/styles//ag-theme-alpine.css";
-import "ag-grid-community/styles//ag-grid.css";
-import { ModuleRegistry } from "@ag-grid-community/core";
-import { RowGroupingModule } from "@ag-grid-enterprise/row-grouping";
-
-ModuleRegistry.registerModules([RowGroupingModule]);
+import test from "../../mixin.js";
+import _ from "lodash";
 
 export default {
   name: "TRChartBoard",
-  components: { AgGridVue },
+  components: {},
+  mixins: [test],
   data() {
     return {
       TRChartData: {},
       dataSet: [],
-      countryTotal: 0,
-      regionTotal: 0,
-      cityTotal: 0,
-      allTotal: 0,
-      columnDefs: [
-        { field: "country", rowGroup: true, hide: true },
-        { field: "region", rowGroup: true, hide: true },
-        {
-          field: "city",
-          // field: "Country (IP) > Region (IP) > City (IP)",
-          minWidth: 250,
-          cellRenderer: (params) => {
-            return `<span style="margin-left: 60px">${params.value}</span>`;
-          },
-        },
-        { field: "sum", minWidth: 200 },
-      ],
-      gridApi: null,
-      columnApi: null,
-      defaultColDef: {
-        flex: 1,
-        minWidth: 100,
-        sortable: true,
-        resizable: true,
-      },
-      groupDisplayType: null,
-      rowData: null,
+      dataSetMap: new Map(),
+      // countrySet: [],
+      // regionSet: [],
+      // citySet: [],
+      isOpenCountry: false,
+      isOpenRegion: false,
     };
   },
-  created() {
-    this.groupDisplayType = "groupRows";
-  },
+  // created() {
+  //   this.groupDisplayType = "groupRows";
+  // },
   watch: {
     TRChartData() {
       // data set
@@ -84,7 +88,95 @@ export default {
         tempData.sum = data[3];
         this.dataSet.push(tempData);
       });
-      this.onGridReady();
+      // data paring Map
+      const countrySet = [];
+      const countryMap = new Map();
+      const regionMap = new Map();
+      const cityMap = new Map();
+      const countryList = [];
+      const regionList = [];
+      const cityList = [];
+      // country parsing
+      let tempCo = [];
+      let tempRe = [];
+      let tempCi = [];
+      tempCo = _.uniqBy(this.dataSet, "country");
+      tempRe = _.uniqBy(this.dataSet, "region");
+      tempCi = _.uniqBy(this.dataSet, "city");
+      console.log("tempCo = ", tempCo);
+      console.log("tempRe = ", tempRe);
+      console.log("tempCi = ", tempCi);
+      tempCo.forEach((data) => {
+        countryList.push(data.country);
+      });
+      console.log("countryList = ", countryList);
+      // city Map
+      tempCi.forEach((dataCi) => {
+        cityMap.set(dataCi.city, dataCi.sum);
+      });
+      console.log("cityMap = ", cityMap);
+      cityMap.forEach((val, key) => {
+        console.log(val + "," + key);
+        regionList.push(key);
+      });
+      // region Map
+      tempRe.forEach((dataRe) => {
+        cityMap.forEach((val, key) => {
+          if (dataRe.region === key) {
+            regionMap.set(dataRe.region, key);
+          }
+        });
+      });
+      // country Map
+      countryList.forEach((list) => {
+        countryMap.set(list, "");
+      });
+      console.log("cityMap = ", cityMap);
+
+      // under country sum
+      // this.dataSet.forEach((dataSet) => {
+      //   tempCo.forEach((data) => {
+      //     if (dataSet.country === data.country) {
+      //       this.countrySet.forEach((dataT) => {
+      //         if (dataT.country === dataSet.country) {
+      //           dataT.countrySum += Number(dataSet.sum);
+      //         }
+      //       });
+      //     }
+      //   });
+      // });
+      // console.log("this.countrySet = ", this.countrySet);
+
+      // // region parsing
+      // // let tempRe = [];
+      // this.dataSet.forEach((dataSet) => {
+      //   const regionTemp = {
+      //     country: "",
+      //     region: "",
+      //   };
+      //   this.countrySet.forEach((dataCo) => {
+      //     if (dataSet.country === dataCo.country) {
+      //       regionTemp.country = dataSet.country;
+      //       regionTemp.region = dataSet.region;
+      //     }
+      //   });
+      //   this.regionSet.push(regionTemp);
+      // });
+      // console.log("regionSet = ", this.regionSet);
+      // this.dataSet.forEach((dataSet) => {
+      //   tempCo.forEach((data) => {
+      //     if (dataSet.country === data.country) {
+      //       this.countrySet.forEach((dataT) => {
+      //         if (dataT.country === dataSet.country) {
+      //           dataT.countrySum += 1;
+      //         }
+      //       });
+      //     }
+      //   });
+      // });
+      // if (data[0])
+      // countryTemp.sum =
+      console.log("dataSet = ", this.dataSet);
     },
   },
   mounted() {
@@ -100,15 +192,8 @@ export default {
           console.log("TRChartData = ", this.TRChartData);
         });
     },
-    onGridReadySet(params) {
-      this.gridApi = params.api;
-      this.gridColumnApi = params.columnApi;
-    },
-    onGridReady() {
-      const updateData = (data) => {
-        this.rowData = data;
-      };
-      updateData(this.dataSet);
+    openCountry() {
+      this.isOpenCountry = true;
     },
   },
 };

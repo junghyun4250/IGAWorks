@@ -2,6 +2,7 @@
   <div class="board-container">
     <div class="board-title">
       <span>DAU</span>
+      <p>라이브러리 버전 문제로 보임... (미완)</p>
     </div>
     <div class="stick-chart" style="height: 400px">
       <CanvasJSChart
