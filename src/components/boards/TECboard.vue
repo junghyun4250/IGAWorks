@@ -44,13 +44,11 @@ export default {
   watch: {
     TECdata() {
       // 오늘날짜 총 접속 유저 찾기
-      console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
       this.TECdata.rows.forEach((data) => {
         if (data[0] === this.now.format("YYYY-MM-DD")) {
           this.total += Number(data[2]);
         }
       });
-      console.log(this.total);
       // 어제와 비교하여 감소 또는 증가된 수
       this.TECdata.rows.forEach((data) => {
         if (data[0] === this.now.subtract(1, "day").format("YYYY-MM-DD")) {
@@ -65,9 +63,7 @@ export default {
       axios
         .get("https://static.adbrix.io/front/coding-test/event_1.json")
         .then((response) => {
-          console.log(response);
           this.TECdata = response.data.data;
-          console.log("TECdata = ", this.TECdata);
         });
     },
   },

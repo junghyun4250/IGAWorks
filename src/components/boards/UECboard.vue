@@ -41,13 +41,11 @@ export default {
   watch: {
     UECdata() {
       // 오늘날짜 총 접속 유저 찾기
-      console.log("오늘날짜 = ", this.now.format("YYYY-MM-DD"));
       this.UECdata.rows.forEach((data) => {
         if (data[0] === this.now.format("YYYY-MM-DD")) {
           this.total += Number(data[1]);
         }
       });
-      console.log(this.total);
       // 어제와 비교하여 감소 또는 증가된 수
       this.UECdata.rows.forEach((data) => {
         if (data[0] === this.now.subtract(1, "day").format("YYYY-MM-DD")) {
@@ -62,9 +60,7 @@ export default {
       axios
         .get("https://static.adbrix.io/front/coding-test/event_1.json")
         .then((response) => {
-          console.log(response);
           this.UECdata = response.data.data;
-          console.log("UECdata = ", this.UECdata);
         });
     },
   },

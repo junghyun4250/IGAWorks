@@ -51,11 +51,6 @@ export default {
           this.etcTotal += Number(data[1]);
         }
       });
-      console.log("adbrixTotal = ", this.adbrixTotal);
-      console.log("dfineryTotal = ", this.dfineryTotal);
-      console.log("consoleTotal = ", this.consoleTotal);
-      console.log("googleTotal = ", this.googleTotal);
-      console.log("etcTotal = ", this.etcTotal);
       this.options = {
         theme: "light2",
         data: [
@@ -111,9 +106,7 @@ export default {
       await axios
         .get("https://static.adbrix.io/front/coding-test/event_3.json")
         .then((response) => {
-          console.log(response);
           this.TRPieData = response.data.data;
-          console.log("TRPieData = ", this.TRPieData);
         });
     },
   },

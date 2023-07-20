@@ -2,46 +2,61 @@
   <div class="board-container">
     <div class="board-title">
       <span>Top Referral</span>
-      <p>시간부족으로 이벤트 카운트 및 바인딩 작업만 완료 (미완 : 드릴다운)</p>
     </div>
     <div class="chart" style="height: 600px">
-      <table>
-        <theader>
+      <table style="width: 100%">
+        <header style="width: 100%">
           <tr>
-            <td>GroupBy</td>
-            <td>Metrics</td>
+            <th>GroupBy</th>
+            <th>Metrics</th>
           </tr>
           <tr>
-            <td>Country (IP) > Region(IP) > City(IP)</td>
-            <td>Sum(Unique Event Count)</td>
+            <th>Country (IP) > Region(IP) > City(IP)</th>
+            <th>Sum(Unique Event Count)</th>
           </tr>
-        </theader>
+        </header>
         <tbody
-          v-for="(dataSetData, dataSetDataIndex) in dataSet"
-          :key="dataSetDataIndex"
+          v-for="(country, countryIndex) in countrySet"
+          :key="countryIndex"
         >
           <tr>
-            <td @click="openCountry">{{ dataSetData.country }}</td>
-            <td>{{ sumCountry(dataSet, dataSetData.country) }}</td>
-          </tr>
-          <tr>
-            <td @click="openRegion">
-              <span class="region-col">{{ dataSetData.region }}</span>
-            </td>
-            <td>{{ sumRegion(dataSet, dataSetData.region) }}</td>
-          </tr>
-          <tr>
             <td>
-              <span class="city-col">{{ dataSetData.city }}</span>
+              <button type="button" @click="showRegion">
+                {{ isShowRegion ? "<" : ">" }}</button
+              >{{ country }}
             </td>
-            <td>{{ sumCity(dataSet, dataSetData.city) }}</td>
+            <td>{{ sumCountry(dataSet, country) }}</td>
           </tr>
-          <!-- <tr
-            v-for="(regionData, regionDataIndex) in regionSet"
-            :key="regionDataIndex"
-          >
-            <td @click="openRegion">{{ regionData.region }}</td>
-          </tr> -->
+          <template v-for="(region, regionIndex) in regionSet">
+            <tr
+              class="region-wrap"
+              :class="isShowRegion ? 'show' : ''"
+              v-if="country === region.country"
+              :key="regionIndex"
+            >
+              <td style="padding-left: 20px">
+                <button type="button" @click="showCity">
+                  {{ isShowCity ? "<" : ">" }}</button
+                >{{ region.region ? region.region : "-" }}
+                <template v-for="(city, cityIndex) in citySet">
+                  <tr
+                    class="city-wrap"
+                    :class="isShowCity ? 'show' : ''"
+                    v-if="region.region === city.region"
+                    :key="cityIndex"
+                  >
+                    <td style="padding-left: 40px; width: 100%">
+                      {{ city.city }}
+                    </td>
+                    <td>{{ city.cnt }}</td>
+                  </tr>
+                </template>
+              </td>
+              <td style="vertical-align: baseline">
+                {{ sumRegion(dataSet, region.region) }}
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -62,16 +77,13 @@ export default {
       TRChartData: {},
       dataSet: [],
       dataSetMap: new Map(),
-      // countrySet: [],
-      // regionSet: [],
-      // citySet: [],
-      isOpenCountry: false,
-      isOpenRegion: false,
+      countrySet: [],
+      regionSet: [],
+      citySet: [],
+      isShowRegion: false,
+      isShowCity: false,
     };
   },
-  // created() {
-  //   this.groupDisplayType = "groupRows";
-  // },
   watch: {
     TRChartData() {
       // data set
@@ -80,103 +92,62 @@ export default {
           country: "",
           region: "",
           city: "",
-          sum: "",
+          cnt: "",
         };
         tempData.country = data[0];
         tempData.region = data[1];
         tempData.city = data[2];
-        tempData.sum = data[3];
+        tempData.cnt = data[3];
         this.dataSet.push(tempData);
       });
-      // data paring Map
-      const countrySet = [];
-      const countryMap = new Map();
-      const regionMap = new Map();
-      const cityMap = new Map();
-      const countryList = [];
-      const regionList = [];
-      const cityList = [];
       // country parsing
       let tempCo = [];
-      let tempRe = [];
-      let tempCi = [];
       tempCo = _.uniqBy(this.dataSet, "country");
-      tempRe = _.uniqBy(this.dataSet, "region");
-      tempCi = _.uniqBy(this.dataSet, "city");
       console.log("tempCo = ", tempCo);
-      console.log("tempRe = ", tempRe);
-      console.log("tempCi = ", tempCi);
       tempCo.forEach((data) => {
-        countryList.push(data.country);
+        this.countrySet.push(data.country);
       });
-      console.log("countryList = ", countryList);
-      // city Map
-      tempCi.forEach((dataCi) => {
-        cityMap.set(dataCi.city, dataCi.sum);
-      });
-      console.log("cityMap = ", cityMap);
-      cityMap.forEach((val, key) => {
-        console.log(val + "," + key);
-        regionList.push(key);
-      });
-      // region Map
+      console.log("this.countrySet = ", this.countrySet);
+
+      // region parsing
+      let tempRe = [];
+      tempRe = _.uniqBy(this.dataSet, "region");
+      console.log("tempRe = ", tempRe);
       tempRe.forEach((dataRe) => {
-        cityMap.forEach((val, key) => {
-          if (dataRe.region === key) {
-            regionMap.set(dataRe.region, key);
+        this.countrySet.forEach((country) => {
+          if (dataRe.country === country) {
+            const tempRegionList = {
+              country: "",
+              region: "",
+            };
+            tempRegionList.country = dataRe.country;
+            tempRegionList.region = dataRe.region;
+            this.regionSet.push(tempRegionList);
           }
         });
       });
-      // country Map
-      countryList.forEach((list) => {
-        countryMap.set(list, "");
+      console.log("this.regionSet = ", this.regionSet);
+
+      // city parsing
+      let tempCi = [];
+      tempCi = _.uniqBy(this.dataSet, "city");
+      console.log("tempCi = ", tempCi);
+      tempCi.forEach((dataCi) => {
+        this.regionSet.forEach((region) => {
+          if (dataCi.region === region.region) {
+            const tempcityList = {
+              region: "",
+              city: "",
+              cnt: "",
+            };
+            tempcityList.region = dataCi.region;
+            tempcityList.city = dataCi.city;
+            tempcityList.cnt = dataCi.cnt;
+            this.citySet.push(tempcityList);
+          }
+        });
       });
-      console.log("cityMap = ", cityMap);
-
-      // under country sum
-      // this.dataSet.forEach((dataSet) => {
-      //   tempCo.forEach((data) => {
-      //     if (dataSet.country === data.country) {
-      //       this.countrySet.forEach((dataT) => {
-      //         if (dataT.country === dataSet.country) {
-      //           dataT.countrySum += Number(dataSet.sum);
-      //         }
-      //       });
-      //     }
-      //   });
-      // });
-      // console.log("this.countrySet = ", this.countrySet);
-
-      // // region parsing
-      // // let tempRe = [];
-      // this.dataSet.forEach((dataSet) => {
-      //   const regionTemp = {
-      //     country: "",
-      //     region: "",
-      //   };
-      //   this.countrySet.forEach((dataCo) => {
-      //     if (dataSet.country === dataCo.country) {
-      //       regionTemp.country = dataSet.country;
-      //       regionTemp.region = dataSet.region;
-      //     }
-      //   });
-      //   this.regionSet.push(regionTemp);
-      // });
-      // console.log("regionSet = ", this.regionSet);
-      // this.dataSet.forEach((dataSet) => {
-      //   tempCo.forEach((data) => {
-      //     if (dataSet.country === data.country) {
-      //       this.countrySet.forEach((dataT) => {
-      //         if (dataT.country === dataSet.country) {
-      //           dataT.countrySum += 1;
-      //         }
-      //       });
-      //     }
-      //   });
-      // });
-      // if (data[0])
-      // countryTemp.sum =
-      console.log("dataSet = ", this.dataSet);
+      console.log("this.citySet = ", this.citySet);
     },
   },
   mounted() {
@@ -192,11 +163,30 @@ export default {
           console.log("TRChartData = ", this.TRChartData);
         });
     },
-    openCountry() {
-      this.isOpenCountry = true;
+    showRegion() {
+      this.isShowRegion = !this.isShowRegion;
+    },
+    showCity() {
+      this.isShowCity = !this.isShowCity;
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+.TRTable {
+  width: 100%;
+}
+.region-wrap {
+  display: none;
+}
+.region-wrap.show {
+  display: revert;
+}
+.city-wrap {
+  display: none;
+}
+.city-wrap.show {
+  display: revert;
+}
+</style>

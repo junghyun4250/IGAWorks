@@ -126,10 +126,4 @@ export default {
 .region-show.on {
   display: none;
 }
-.region-col {
-  margin-left: 20px;
-}
-.city-col {
-  margin-left: 40px;
-}
 </style>

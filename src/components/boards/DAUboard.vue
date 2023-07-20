@@ -105,8 +105,6 @@ export default {
 
         this.dataPointsList2.push(temp2);
       });
-      console.log("dataPointsList1 = ", this.dataPointsList1);
-      console.log("dataPointsList2 = ", this.dataPointsList2);
 
       // options setting
       this.options = {
@@ -134,8 +132,7 @@ export default {
           },
         ],
       };
-      console.log("options = ", this.options);
-      this.createPareto();
+      // this.createPareto();
     },
   },
   methods: {
@@ -157,9 +154,7 @@ export default {
       await axios
         .get("https://static.adbrix.io/front/coding-test/event_1.json")
         .then((response) => {
-          console.log(response);
           this.DAUdata = response.data.data;
-          console.log("DAUdata = ", this.DAUdata);
         });
     },
   },
