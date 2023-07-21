@@ -1,5 +1,5 @@
 <template>
-  <div class="board-container">
+  <div class="board-container" style="overflow-y: scroll">
     <div class="board-title">
       <span>Top Referral</span>
     </div>
@@ -31,11 +31,7 @@
           <template v-for="(region, regionIndex) in regionSet">
             <tr
               class="region-wrap"
-              :class="
-                country.isOpen
-                  ? 'show ' + country.country
-                  : '' + country.country
-              "
+              :class="country.isOpen ? 'show' : ''"
               :id="country.country"
               v-if="country.country === region.country"
               :key="regionIndex"
@@ -47,11 +43,7 @@
                 <template v-for="(city, cityIndex) in citySet">
                   <tr
                     class="city-wrap"
-                    :class="
-                      region.isOpen
-                        ? 'show ' + region.region
-                        : '' + region.region
-                    "
+                    :class="region.isOpen ? 'show' : ''"
                     :id="region.region"
                     v-if="region.region === city.region"
                     :key="cityIndex"

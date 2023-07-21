@@ -1,59 +1,53 @@
 <template>
   <div>
-    <button type="button" @click="widgetOn">Widget Test</button>
-    <span>
-      사이즈 및 위치 이동 기능은 작동 하지만 버전 문제로 인해 화면 이슈 있음
-      (시간부족 미완...)
-    </span>
-    <div v-if="!isWidget">
-      <UECboard />
-      <TECboard />
-      <DAUboard :key="reload" />
-      <TRPieBoard />
-      <TRChartBoard />
-    </div>
-    <div v-else>
-      <SmartWidgetGrid :layout="layout">
-        <SmartWidget :v-slot="0" simple>
-          <div class="layout-center">
-            <UECboard />
-          </div>
-        </SmartWidget>
-        <SmartWidget :v-slot="1" simple>
-          <div class="layout-center">
-            <TECboard />
-          </div>
-        </SmartWidget>
-        <SmartWidget :v-slot="2" simple>
-          <div class="layout-center">
-            <DAUboard :rows="dauData.rows" />
-          </div>
-        </SmartWidget>
-        <SmartWidget :v-slot="3" simple>
-          <div class="layout-center">
-            <TRPieBoard />
-          </div>
-        </SmartWidget>
-        <SmartWidget :v-slot="4" simple>
-          <div class="layout-center">
-            <TRChartBoard />
-          </div>
-        </SmartWidget>
-      </SmartWidgetGrid>
+    <div class="grid-widget">
+      <smart-widget-grid :layout="layout">
+        <template #0>
+          <smart-widget simple>
+            <div class="layout-center">
+              <UECboard />
+            </div>
+          </smart-widget>
+        </template>
+        <template #1>
+          <smart-widget simple>
+            <div class="layout-center">
+              <TECboard />
+            </div>
+          </smart-widget>
+        </template>
+        <template #2>
+          <smart-widget simple>
+            <div class="layout-center">
+              <DAUboard />
+            </div>
+          </smart-widget>
+        </template>
+        <template #3>
+          <smart-widget simple>
+            <div class="layout-center">
+              <TRPieBoard />
+            </div>
+          </smart-widget>
+        </template>
+        <template #4>
+          <smart-widget simple>
+            <div class="layout-center">
+              <TRChartBoard />
+            </div>
+          </smart-widget>
+        </template>
+      </smart-widget-grid>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import UECboard from "./components/boards/UECboard.vue";
 import TECboard from "./components/boards/TECboard.vue";
 import DAUboard from "./components/boards/DAUboard.vue";
 import TRPieBoard from "./components/boards/TRPieBoard.vue";
 import TRChartBoard from "./components/boards/TRChartBoard.vue";
-import { SmartWidget } from "vue-smart-widget";
-// import VueSmartWidget from "vue-smart-widget";
-import { SmartWidgetGrid } from "vue-smart-widget";
 
 export default {
   name: "App",
@@ -63,50 +57,29 @@ export default {
     DAUboard,
     TRPieBoard,
     TRChartBoard,
-    SmartWidget,
-    // VueSmartWidget,
-    SmartWidgetGrid,
   },
   data() {
     return {
-      dauData: [],
       layout: [
-        { x: 0, y: 0, w: 6, h: 4, i: 0 },
-        { x: 6, y: 0, w: 6, h: 4, i: 1 },
-        { x: 0, y: 1, w: 12, h: 4, i: 2 },
-        { x: 0, y: 2, w: 6, h: 4, i: 3 },
-        { x: 6, y: 2, w: 6, h: 4, i: 4 },
+        { x: 0, y: 0, w: 6, h: 3, i: 0 },
+        { x: 6, y: 0, w: 6, h: 3, i: 1 },
+        { x: 0, y: 1, w: 12, h: 8, i: 2 },
+        { x: 0, y: 2, w: 6, h: 8, i: 3 },
+        { x: 6, y: 2, w: 6, h: 8, i: 4 },
       ],
-      isWidget: false,
-      reload: 0,
     };
-  },
-  mounted() {
-    this.get();
-    console.log("this.dauData = ", this.dauData);
-    this.reload += 1;
-  },
-  methods: {
-    widgetOn() {
-      this.isWidget = !this.isWidget;
-    },
-    async get() {
-      await axios
-        .get("https://static.adbrix.io/front/coding-test/event_1.json")
-        .then((response) => {
-          this.dauData = response.data.data;
-        });
-    },
   },
 };
 </script>
 
 <style>
-/* body {
-  background-color: gray;
-} */
+body {
+  background-color: grey;
+}
 .board-container {
+  background-color: #ffffff;
   padding: 15px;
+  max-height: 450px;
 }
 .board-title span {
   font-size: 18px;

@@ -5,8 +5,8 @@ import VueSmartWidget from "vue-smart-widget";
 import { SmartWidgetGrid } from "vue-smart-widget";
 
 const app = createApp(App);
+app.component(SmartWidgetGrid);
 app.use(VueSmartWidget);
-// app.use(SmartWidgetGrid);
 app.use(CanvasJSChart);
 app.mount("#app");
 
