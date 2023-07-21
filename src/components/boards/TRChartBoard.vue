@@ -21,27 +21,38 @@
         >
           <tr>
             <td>
-              <button type="button" @click="showRegion">
-                {{ isShowRegion ? "<" : ">" }}</button
-              >{{ country }}
+              <button type="button" @click="showRegion(country.country)">
+                {{ country.isOpen ? "<" : ">" }}
+              </button>
+              {{ country.country }}
             </td>
-            <td>{{ sumCountry(dataSet, country) }}</td>
+            <td>{{ sumCountry(dataSet, country.country) }}</td>
           </tr>
           <template v-for="(region, regionIndex) in regionSet">
             <tr
               class="region-wrap"
-              :class="isShowRegion ? 'show' : ''"
-              v-if="country === region.country"
+              :class="
+                country.isOpen
+                  ? 'show ' + country.country
+                  : '' + country.country
+              "
+              :id="country.country"
+              v-if="country.country === region.country"
               :key="regionIndex"
             >
               <td style="padding-left: 20px">
-                <button type="button" @click="showCity">
-                  {{ isShowCity ? "<" : ">" }}</button
+                <button type="button" @click="showCity(region.region)">
+                  {{ region.isOpen ? "<" : ">" }}</button
                 >{{ region.region ? region.region : "-" }}
                 <template v-for="(city, cityIndex) in citySet">
                   <tr
                     class="city-wrap"
-                    :class="isShowCity ? 'show' : ''"
+                    :class="
+                      region.isOpen
+                        ? 'show ' + region.region
+                        : '' + region.region
+                    "
+                    :id="region.region"
                     v-if="region.region === city.region"
                     :key="cityIndex"
                   >
@@ -76,7 +87,6 @@ export default {
     return {
       TRChartData: {},
       dataSet: [],
-      dataSetMap: new Map(),
       countrySet: [],
       regionSet: [],
       citySet: [],
@@ -105,7 +115,12 @@ export default {
       tempCo = _.uniqBy(this.dataSet, "country");
       console.log("tempCo = ", tempCo);
       tempCo.forEach((data) => {
-        this.countrySet.push(data.country);
+        const tempCountryList = {
+          isOpen: false,
+          country: "",
+        };
+        tempCountryList.country = data.country;
+        this.countrySet.push(tempCountryList);
       });
       console.log("this.countrySet = ", this.countrySet);
 
@@ -115,8 +130,9 @@ export default {
       console.log("tempRe = ", tempRe);
       tempRe.forEach((dataRe) => {
         this.countrySet.forEach((country) => {
-          if (dataRe.country === country) {
+          if (dataRe.country === country.country) {
             const tempRegionList = {
+              isOpen: false,
               country: "",
               region: "",
             };
@@ -163,11 +179,31 @@ export default {
           console.log("TRChartData = ", this.TRChartData);
         });
     },
-    showRegion() {
-      this.isShowRegion = !this.isShowRegion;
+    showRegion(country) {
+      // this.isShowRegion = !this.isShowRegion;
+      this.countrySet.forEach((countryData) => {
+        if (countryData.country === country) {
+          if (countryData.isOpen) {
+            document.getElementById(country).style.display = "none";
+          } else {
+            document.getElementById(country).style.display = "revert";
+          }
+          countryData.isOpen = !countryData.isOpen;
+        }
+      });
     },
-    showCity() {
+    showCity(region) {
       this.isShowCity = !this.isShowCity;
+      this.regionSet.forEach((regionData) => {
+        if (regionData.region === region) {
+          if (regionData.isOpen) {
+            document.getElementById(region).style.display = "none";
+          } else {
+            document.getElementById(region).style.display = "revert";
+          }
+          regionData.isOpen = !regionData.isOpen;
+        }
+      });
     },
   },
 };
@@ -180,9 +216,9 @@ export default {
 .region-wrap {
   display: none;
 }
-.region-wrap.show {
+/* .region-wrap.show {
   display: revert;
-}
+} */
 .city-wrap {
   display: none;
 }

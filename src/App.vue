@@ -8,7 +8,7 @@
     <div v-if="!isWidget">
       <UECboard />
       <TECboard />
-      <DAUboard />
+      <DAUboard :key="reload" />
       <TRPieBoard />
       <TRChartBoard />
     </div>
@@ -26,7 +26,7 @@
         </SmartWidget>
         <SmartWidget :v-slot="2" simple>
           <div class="layout-center">
-            <DAUboard />
+            <DAUboard :rows="dauData.rows" />
           </div>
         </SmartWidget>
         <SmartWidget :v-slot="3" simple>
@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import UECboard from "./components/boards/UECboard.vue";
 import TECboard from "./components/boards/TECboard.vue";
 import DAUboard from "./components/boards/DAUboard.vue";
@@ -68,6 +69,7 @@ export default {
   },
   data() {
     return {
+      dauData: [],
       layout: [
         { x: 0, y: 0, w: 6, h: 4, i: 0 },
         { x: 6, y: 0, w: 6, h: 4, i: 1 },
@@ -76,11 +78,24 @@ export default {
         { x: 6, y: 2, w: 6, h: 4, i: 4 },
       ],
       isWidget: false,
+      reload: 0,
     };
+  },
+  mounted() {
+    this.get();
+    console.log("this.dauData = ", this.dauData);
+    this.reload += 1;
   },
   methods: {
     widgetOn() {
       this.isWidget = !this.isWidget;
+    },
+    async get() {
+      await axios
+        .get("https://static.adbrix.io/front/coding-test/event_1.json")
+        .then((response) => {
+          this.dauData = response.data.data;
+        });
     },
   },
 };
