@@ -4,64 +4,74 @@
       <span>Top Referral</span>
     </div>
     <div class="chart" style="height: 600px">
-      <table style="width: 100%">
-        <header style="width: 100%">
-          <tr>
-            <th>GroupBy</th>
-            <th>Metrics</th>
-          </tr>
-          <tr>
-            <th>Country (IP) > Region(IP) > City(IP)</th>
-            <th>Sum(Unique Event Count)</th>
-          </tr>
-        </header>
-        <tbody
-          v-for="(country, countryIndex) in countrySet"
-          :key="countryIndex"
+      <div class="table-header">
+        <span class="name">GroupBy</span>
+        <span class="count">Metrics</span>
+      </div>
+      <div class="table-header">
+        <span class="name"
+          ><strong
+            ><span @click="orderBy('country')">Country (IP)</span> >
+            <span @click="orderBy('region')">Region(IP)</span> >
+            <span @click="orderBy('city')">City(IP)</span></strong
+          ></span
         >
-          <tr>
-            <td>
-              <button type="button" @click="showRegion(country.country)">
-                {{ country.isOpen ? "<" : ">" }}
-              </button>
-              {{ country.country }}
-            </td>
-            <td>{{ sumCountry(dataSet, country.country) }}</td>
-          </tr>
-          <template v-for="(region, regionIndex) in regionSet">
-            <tr
+        <span class="count"><strong>Sum(Unique Event Count)</strong></span>
+      </div>
+      <div
+        class="country-wrap"
+        v-for="(data, dataIndex) in dataJSON"
+        :key="dataIndex"
+      >
+        <div class="country">
+          <button
+            class="open-btn"
+            type="button"
+            @click="showRegion(data.country)"
+          >
+            {{ data.isOpen ? "<" : ">" }}
+          </button>
+          <span class="name">
+            {{ data.country }}({{ totalCountry(data) }})</span
+          >
+          <span class="count">{{ sumCountry(dataJSON, data.country) }}</span>
+          <div class="region-ctr" :class="data.isOpen ? 'show' : ''">
+            <div
               class="region-wrap"
-              :class="country.isOpen ? 'show' : ''"
-              :id="country.country"
-              v-if="country.country === region.country"
+              v-for="(region, regionIndex) in data.region"
               :key="regionIndex"
             >
-              <td style="padding-left: 20px">
-                <button type="button" @click="showCity(region.region)">
-                  {{ region.isOpen ? "<" : ">" }}</button
-                >{{ region.region ? region.region : "-" }}
-                <template v-for="(city, cityIndex) in citySet">
-                  <tr
+              <div class="region">
+                <button
+                  class="open-btn"
+                  type="button"
+                  @click="showCity(region.region)"
+                >
+                  {{ region.isOpen ? "<" : ">" }}
+                </button>
+                <span class="name"
+                  >{{ region.region }}({{ totalRegion(region) }})</span
+                >
+                <span class="count">{{
+                  sumRegion(region, region.region)
+                }}</span>
+                <div class="city-ctr" :class="region.isOpen ? 'show' : ''">
+                  <div
                     class="city-wrap"
-                    :class="region.isOpen ? 'show' : ''"
-                    :id="region.region"
-                    v-if="region.region === city.region"
+                    v-for="(city, cityIndex) in region.city"
                     :key="cityIndex"
                   >
-                    <td style="padding-left: 40px; width: 100%">
-                      {{ city.city }}
-                    </td>
-                    <td>{{ city.cnt }}</td>
-                  </tr>
-                </template>
-              </td>
-              <td style="vertical-align: baseline">
-                {{ sumRegion(dataSet, region.region) }}
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
+                    <div class="city">
+                      <span class="name">{{ city.city }}</span>
+                      <span class="count">{{ sumCity(city, city.city) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -79,11 +89,15 @@ export default {
     return {
       TRChartData: {},
       dataSet: [],
+      dataJSON: [],
+      tempDataJSON: [],
       countrySet: [],
       regionSet: [],
       citySet: [],
-      isShowRegion: false,
-      isShowCity: false,
+      // 홀짝을 위한 변수
+      cntCountry: 0,
+      cntRegion: 0,
+      cntCity: 0,
     };
   },
   watch: {
@@ -102,10 +116,10 @@ export default {
         tempData.cnt = data[3];
         this.dataSet.push(tempData);
       });
+
       // country parsing
       let tempCo = [];
       tempCo = _.uniqBy(this.dataSet, "country");
-      console.log("tempCo = ", tempCo);
       tempCo.forEach((data) => {
         const tempCountryList = {
           isOpen: false,
@@ -114,12 +128,10 @@ export default {
         tempCountryList.country = data.country;
         this.countrySet.push(tempCountryList);
       });
-      console.log("this.countrySet = ", this.countrySet);
 
       // region parsing
       let tempRe = [];
       tempRe = _.uniqBy(this.dataSet, "region");
-      console.log("tempRe = ", tempRe);
       tempRe.forEach((dataRe) => {
         this.countrySet.forEach((country) => {
           if (dataRe.country === country.country) {
@@ -134,12 +146,10 @@ export default {
           }
         });
       });
-      console.log("this.regionSet = ", this.regionSet);
 
       // city parsing
       let tempCi = [];
       tempCi = _.uniqBy(this.dataSet, "city");
-      console.log("tempCi = ", tempCi);
       tempCi.forEach((dataCi) => {
         this.regionSet.forEach((region) => {
           if (dataCi.region === region.region) {
@@ -155,7 +165,49 @@ export default {
           }
         });
       });
-      console.log("this.citySet = ", this.citySet);
+      // test
+      tempCo.forEach((country) => {
+        const tempData = {
+          isOpen: false,
+          country: "",
+          region: [],
+        };
+        tempData.country = country.country;
+        this.dataJSON.push(tempData);
+      });
+      this.dataSet.forEach((data) => {
+        this.dataJSON.forEach((countrySet) => {
+          const tempData = {
+            isOpen: false,
+            region: "",
+            city: [],
+          };
+          if (countrySet.country === data.country) {
+            tempData.region = data.region;
+            countrySet.region.push(tempData);
+          }
+        });
+      });
+      // region 중복제거
+      this.dataJSON.forEach((data) => {
+        data.region = _.uniqBy(data.region, "region");
+      });
+      this.dataSet.forEach((data) => {
+        this.dataJSON.forEach((countrySet) => {
+          countrySet.region.forEach((regionSet) => {
+            if (regionSet.region === data.region) {
+              const tempData = {
+                city: "",
+                cnt: "",
+              };
+              tempData.city = data.city;
+              tempData.cnt = data.cnt;
+              regionSet.city.push(tempData);
+            }
+          });
+        });
+      });
+      // city
     },
   },
   mounted() {
@@ -166,55 +218,120 @@ export default {
       await axios
         .get("https://static.adbrix.io/front/coding-test/event_4.json")
         .then((response) => {
-          console.log(response);
           this.TRChartData = response.data.data;
-          console.log("TRChartData = ", this.TRChartData);
         });
     },
     showRegion(country) {
-      // this.isShowRegion = !this.isShowRegion;
-      this.countrySet.forEach((countryData) => {
+      this.dataJSON.forEach((countryData) => {
         if (countryData.country === country) {
           if (countryData.isOpen) {
-            document.getElementById(country).style.display = "none";
+            countryData.isOpen = !countryData.isOpen;
           } else {
-            document.getElementById(country).style.display = "revert";
+            countryData.isOpen = !countryData.isOpen;
           }
-          countryData.isOpen = !countryData.isOpen;
         }
       });
     },
     showCity(region) {
-      this.isShowCity = !this.isShowCity;
-      this.regionSet.forEach((regionData) => {
-        if (regionData.region === region) {
-          if (regionData.isOpen) {
-            document.getElementById(region).style.display = "none";
-          } else {
-            document.getElementById(region).style.display = "revert";
+      this.dataJSON.forEach((countryData) => {
+        countryData.region.forEach((regionData) => {
+          if (regionData.region === region) {
+            if (regionData.isOpen) {
+              regionData.isOpen = !regionData.isOpen;
+            } else {
+              regionData.isOpen = !regionData.isOpen;
+            }
           }
-          regionData.isOpen = !regionData.isOpen;
-        }
+        });
       });
     },
+    orderBy(orderType) {
+      if (orderType === "country") {
+        if (this.cntCountry % 2 == 0) {
+          this.cntCountry += 1;
+          this.dataJSON = _.sortBy(this.dataJSON, "country");
+        } else {
+          this.cntCountry += 1;
+          this.dataJSON = _.sortBy(this.dataJSON, "country").reverse();
+        }
+      }
+      if (orderType === "region") {
+        if (this.cntRegion % 2 == 0) {
+          this.cntRegion += 1;
+          this.dataJSON.forEach((data) => {
+            data.region = _.sortBy(data.region, "region");
+          });
+        } else {
+          this.cntRegion += 1;
+          this.dataJSON.forEach((data) => {
+            data.region = _.sortBy(data.region, "region").reverse();
+          });
+        }
+      }
+      if (orderType === "city") {
+        if (this.cntCity % 2 == 0) {
+          this.cntCity += 1;
+          this.dataJSON.forEach((data) => {
+            data.region.forEach((r) => {
+              r.city = _.sortBy(r.city, "city");
+            });
+          });
+        } else {
+          this.cntCity += 1;
+          this.dataJSON.forEach((data) => {
+            data.region.forEach((r) => {
+              r.city = _.sortBy(r.city, "city").reverse();
+            });
+          });
+        }
+      }
+    },
+    regionOrderBy() {},
+    cityOrderByI() {},
   },
 };
 </script>
 
 <style>
-.TRTable {
+.chart {
+  width: 100%;
+}
+.chart .country-wrap {
+  width: 100%;
+}
+.chart .country-wrap .country {
   width: 100%;
 }
 .region-wrap {
+  width: 100%;
+}
+.region-wrap .region {
+  margin-left: 20px;
+}
+.city-wrap .city {
+  margin-left: 40px;
+}
+.open-btn {
+  display: inline-block;
+}
+.name {
+  width: 50%;
+}
+.count {
+  width: 50%;
+  float: right;
+}
+
+.region-ctr {
   display: none;
 }
-/* .region-wrap.show {
-  display: revert;
-} */
-.city-wrap {
+.region-ctr.show {
+  display: block;
+}
+.city-ctr {
   display: none;
 }
-.city-wrap.show {
-  display: revert;
+.city-ctr.show {
+  display: block;
 }
 </style>

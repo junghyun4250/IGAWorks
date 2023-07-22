@@ -82,7 +82,6 @@ export default {
     };
   },
   mounted() {
-    console.log("this.rows =- ", this.rows);
     this.get();
   },
   watch: {
@@ -106,11 +105,6 @@ export default {
         tempTotal.y = Number(data[2]);
         this.options.data[0].dataPoints.push(tempTotal);
       });
-      console.log(
-        "this.options.data[0].dataPoints = ",
-        this.options.data[0].dataPoints
-      );
-      console.log("this.totalDataPoints = ", this.totalDataPoints);
       this.reload += 1;
     },
   },
